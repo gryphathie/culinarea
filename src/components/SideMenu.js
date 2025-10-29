@@ -1,7 +1,26 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { authService } from '../firebase/auth';
 import './SideMenu.css';
 
 const SideMenu = ({ isOpen, onClose }) => {
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await authService.signOut();
+      onClose(); // Close the menu
+      navigate('/'); // Redirect to home page
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
+
+  const handleProfileClick = () => {
+    onClose(); // Close the menu
+    navigate('/auth'); // Navigate to auth page
+  };
+
   return (
     <>
       {/* Overlay */}
@@ -18,28 +37,28 @@ const SideMenu = ({ isOpen, onClose }) => {
         
         <ul className="menu-list">
           <li>
-            <a href="/profile" onClick={onClose} className="menu-link">
+            <button onClick={handleProfileClick} className="menu-link">
               <span className="menu-icon">👤</span>
               Profile
-            </a>
+            </button>
           </li>
           <li>
-            <a href="/notifications" onClick={onClose} className="menu-link">
+            <button onClick={onClose} className="menu-link">
               <span className="menu-icon">🔔</span>
               Notifications
-            </a>
+            </button>
           </li>
           <li>
-            <a href="/help" onClick={onClose} className="menu-link">
+            <button onClick={onClose} className="menu-link">
               <span className="menu-icon">❓</span>
               Help
-            </a>
+            </button>
           </li>
           <li>
-            <a href="/logout" onClick={onClose} className="menu-link logout">
+            <button onClick={handleLogout} className="menu-link logout">
               <span className="menu-icon">🚪</span>
               Logout
-            </a>
+            </button>
           </li>
         </ul>
       </nav>
