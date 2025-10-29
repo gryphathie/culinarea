@@ -1,24 +1,33 @@
-import logo from './logo.svg';
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
+import TopNavBar from './components/TopNavBar';
+import SideMenu from './components/SideMenu';
+import HomePage from './components/pages/HomePage';
+import RecipesPage from './components/pages/RecipesPage';
 
 function App() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  const closeMenu = () => {
+    setIsMenuOpen(false);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div className="App">
+        <TopNavBar onMenuToggle={toggleMenu} isMenuOpen={isMenuOpen} />
+        <SideMenu isOpen={isMenuOpen} onClose={closeMenu} />
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/recetas" element={<RecipesPage />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
