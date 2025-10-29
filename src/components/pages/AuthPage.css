@@ -5,7 +5,7 @@
   align-items: center;
   justify-content: center;
   background: #FFFFFF;
-  padding: 10px 16px 32px; /* top accounts for fixed nav */
+  padding: 20px 16px; /* Removed top padding since no nav bar */
 }
 
 .auth-card {
