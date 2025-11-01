@@ -5,6 +5,7 @@ import TopNavBar from './components/TopNavBar';
 import SideMenu from './components/SideMenu';
 import HomePage from './components/pages/HomePage';
 import RecipesPage from './components/pages/RecipesPage';
+import RecipeDetailPage from './components/pages/RecipeDetailPage';
 import AuthPage from './components/pages/AuthPage';
 import AdminCreateRecipe from './components/pages/AdminCreateRecipe';
 import AdminRecipesList from './components/pages/AdminRecipesList';
@@ -47,6 +48,11 @@ function AppContent() {
         <Route path="/recetas" element={
           <ProtectedRoute>
             <RecipesPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/receta/:recipeId" element={
+          <ProtectedRoute>
+            <RecipeDetailPage />
           </ProtectedRoute>
         } />
         <Route path="/admin/create-recipe" element={
