@@ -6,7 +6,11 @@ import SideMenu from './components/SideMenu';
 import HomePage from './components/pages/HomePage';
 import RecipesPage from './components/pages/RecipesPage';
 import AuthPage from './components/pages/AuthPage';
+import AdminCreateRecipe from './components/pages/AdminCreateRecipe';
+import AdminRecipesList from './components/pages/AdminRecipesList';
+import AdminEditRecipe from './components/pages/AdminEditRecipe';
 import ProtectedRoute from './components/ProtectedRoute';
+import AdminProtectedRoute from './components/AdminProtectedRoute';
 
 function AppContent() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -44,6 +48,21 @@ function AppContent() {
           <ProtectedRoute>
             <RecipesPage />
           </ProtectedRoute>
+        } />
+        <Route path="/admin/create-recipe" element={
+          <AdminProtectedRoute>
+            <AdminCreateRecipe />
+          </AdminProtectedRoute>
+        } />
+        <Route path="/admin/recipes" element={
+          <AdminProtectedRoute>
+            <AdminRecipesList />
+          </AdminProtectedRoute>
+        } />
+        <Route path="/admin/edit-recipe/:recipeId" element={
+          <AdminProtectedRoute>
+            <AdminEditRecipe />
+          </AdminProtectedRoute>
         } />
       </Routes>
     </div>

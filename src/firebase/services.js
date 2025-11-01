@@ -5,6 +5,7 @@ import {
   getDocs, 
   getDoc, 
   addDoc, 
+  setDoc,
   updateDoc, 
   deleteDoc, 
   query, 
@@ -180,11 +181,63 @@ export const userService = {
 
   // Create user profile
   async createUserProfile(userId, profileData) {
-    return await firestoreService.create('users', { userId, ...profileData });
+    try {
+      const docRef = doc(db, 'users', userId);
+      await setDoc(docRef, {
+        userId,
+        ...profileData,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+      return { id: userId, userId, ...profileData };
+    } catch (error) {
+      console.error('Error creating user profile:', error);
+      throw error;
+    }
   },
 
   // Update user profile
   async updateUserProfile(userId, profileData) {
     return await firestoreService.update('users', userId, profileData);
+  },
+
+  // Check if user is admin
+  async isAdmin(userId) {
+    try {
+      const profile = await firestoreService.getById('users', userId);
+      return profile?.role === 'admin' || profile?.role === 'propietary';
+    } catch (error) {
+      return false;
+    }
+  },
+
+  // Check if user is admin specifically (not propietary)
+  async isAdminOnly(userId) {
+    try {
+      const profile = await firestoreService.getById('users', userId);
+      return profile?.role === 'admin';
+    } catch (error) {
+      return false;
+    }
+  },
+
+  // Check if user is propietary
+  async isPropietary(userId) {
+    try {
+      const profile = await firestoreService.getById('users', userId);
+      return profile?.role === 'propietary';
+    } catch (error) {
+      return false;
+    }
+  },
+
+  // Get user role
+  async getUserRole(userId) {
+    try {
+      const profile = await firestoreService.getById('users', userId);
+      return profile?.role || null;
+    } catch (error) {
+      return null;
+    }
   }
 };

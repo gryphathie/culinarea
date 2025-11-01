@@ -1,10 +1,30 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authService } from '../firebase/auth';
+import { authService, useAuth } from '../firebase/auth';
+import { userService } from '../firebase/services';
 import './SideMenu.css';
 
 const SideMenu = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      if (user) {
+        try {
+          const adminStatus = await userService.isAdmin(user.uid);
+          setIsAdmin(adminStatus);
+        } catch (error) {
+          console.error('Error checking admin status:', error);
+        }
+      }
+    };
+
+    if (isOpen && user) {
+      checkAdmin();
+    }
+  }, [user, isOpen]);
 
   const handleLogout = async () => {
     try {
@@ -19,6 +39,16 @@ const SideMenu = ({ isOpen, onClose }) => {
   const handleProfileClick = () => {
     onClose(); // Close the menu
     navigate('/auth'); // Navigate to auth page
+  };
+
+  const handleCreateRecipeClick = () => {
+    onClose(); // Close the menu
+    navigate('/admin/create-recipe'); // Navigate to create recipe page
+  };
+
+  const handleRecipesManagementClick = () => {
+    onClose(); // Close the menu
+    navigate('/admin/recipes'); // Navigate to recipes management page
   };
 
   return (
@@ -39,25 +69,35 @@ const SideMenu = ({ isOpen, onClose }) => {
           <li>
             <button onClick={handleProfileClick} className="menu-link">
               <span className="menu-icon">👤</span>
-              Profile
+              Perfil
             </button>
           </li>
+          {isAdmin && (
+            <>
+              <li>
+                <button onClick={handleRecipesManagementClick} className="menu-link">
+                  <span className="menu-icon">📋</span>
+                  Administrar Recetas
+                </button>
+              </li>
+            </>
+          )}
           <li>
             <button onClick={onClose} className="menu-link">
               <span className="menu-icon">🔔</span>
-              Notifications
+              Notificaciones
             </button>
           </li>
           <li>
             <button onClick={onClose} className="menu-link">
               <span className="menu-icon">❓</span>
-              Help
+              Ayuda
             </button>
           </li>
           <li>
             <button onClick={handleLogout} className="menu-link logout">
               <span className="menu-icon">🚪</span>
-              Logout
+              Cerrar sesión
             </button>
           </li>
         </ul>
