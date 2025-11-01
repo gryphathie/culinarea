@@ -32,6 +32,8 @@
   transition: left 0.3s ease;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .side-menu.open {
@@ -81,10 +83,19 @@
   list-style: none;
   padding: 0;
   margin: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .menu-list li {
   border-bottom: 1px solid #E0E0E0;
+}
+
+.menu-list li:last-child {
+  margin-top: auto;
+  border-bottom: none;
+  border-top: 2px solid #E0E0E0;
 }
 
 .menu-link {
@@ -123,6 +134,25 @@
   font-size: 1.2rem;
   width: 24px;
   text-align: center;
+}
+
+/* Menu Section Header */
+.menu-divider {
+  border-bottom: 2px solid #E0E0E0;
+  background-color: #F8F9FA;
+}
+
+.menu-section-header {
+  padding: 15px 20px 10px 20px;
+  background-color: #F8F9FA;
+}
+
+.section-label {
+  color: #50B8B8;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 /* Responsive Design */

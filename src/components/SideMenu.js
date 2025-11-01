@@ -38,7 +38,7 @@ const SideMenu = ({ isOpen, onClose }) => {
 
   const handleProfileClick = () => {
     onClose(); // Close the menu
-    navigate('/auth'); // Navigate to auth page
+    navigate('/perfil'); // Navigate to profile page
   };
 
   const handleCreateRecipeClick = () => {
@@ -49,6 +49,21 @@ const SideMenu = ({ isOpen, onClose }) => {
   const handleRecipesManagementClick = () => {
     onClose(); // Close the menu
     navigate('/admin/recipes'); // Navigate to recipes management page
+  };
+
+  const handleHelpClick = () => {
+    onClose(); // Close the menu
+    navigate('/ayuda'); // Navigate to help page
+  };
+
+  const handleFeedbackManagementClick = () => {
+    onClose(); // Close the menu
+    navigate('/admin/feedback'); // Navigate to feedback management page
+  };
+
+  const handleHomeClick = () => {
+    onClose(); // Close the menu
+    navigate('/'); // Navigate to home page
   };
 
   return (
@@ -67,21 +82,17 @@ const SideMenu = ({ isOpen, onClose }) => {
         
         <ul className="menu-list">
           <li>
+            <button onClick={handleHomeClick} className="menu-link">
+              <span className="menu-icon">🏠</span>
+              Inicio
+            </button>
+          </li>
+          <li>
             <button onClick={handleProfileClick} className="menu-link">
               <span className="menu-icon">👤</span>
               Perfil
             </button>
           </li>
-          {isAdmin && (
-            <>
-              <li>
-                <button onClick={handleRecipesManagementClick} className="menu-link">
-                  <span className="menu-icon">📋</span>
-                  Administrar Recetas
-                </button>
-              </li>
-            </>
-          )}
           <li>
             <button onClick={onClose} className="menu-link">
               <span className="menu-icon">🔔</span>
@@ -90,10 +101,37 @@ const SideMenu = ({ isOpen, onClose }) => {
           </li>
           <li>
             <button onClick={onClose} className="menu-link">
+              <span className="menu-icon">📢</span>
+              Chat de la comunidad
+            </button>
+          </li>
+          <li>
+            <button onClick={handleHelpClick} className="menu-link">
               <span className="menu-icon">❓</span>
               Ayuda
             </button>
           </li>
+          {isAdmin && (
+            <>
+              <li className="menu-divider">
+                <div className="menu-section-header">
+                  <span className="section-label">ADMINISTRADORES</span>
+                </div>
+              </li>
+              <li>
+                <button onClick={handleRecipesManagementClick} className="menu-link">
+                  <span className="menu-icon">📋</span>
+                  Administrar Recetas
+                </button>
+              </li>
+              <li>
+                <button onClick={handleFeedbackManagementClick} className="menu-link">
+                  <span className="menu-icon">💬</span>
+                  Comentarios
+                </button>
+              </li>
+            </>
+          )}
           <li>
             <button onClick={handleLogout} className="menu-link logout">
               <span className="menu-icon">🚪</span>

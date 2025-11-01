@@ -68,6 +68,25 @@
   transform: rotate(-45deg) translate(6px, -6px);
 }
 
+/* Nav Logo */
+.nav-logo {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #50B8B8;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  margin-left: 20px;
+}
+
+.nav-logo:hover {
+  color: #3a9a9a;
+  transform: scale(1.05);
+}
+
 /* Search Form */
 .search-form {
   position: absolute;

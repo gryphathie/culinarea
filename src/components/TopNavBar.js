@@ -1,17 +1,25 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './TopNavBar.css';
 
 const TopNavBar = ({ onMenuToggle, isMenuOpen }) => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
 
   const handleSearch = (e) => {
     e.preventDefault();
-    // Add search functionality here
-    console.log('Searching for:', searchTerm);
+    if (searchTerm.trim()) {
+      navigate(`/buscar?q=${encodeURIComponent(searchTerm.trim())}`);
+      setSearchTerm(''); // Clear search after navigating
+    }
   };
 
   const handleInputChange = (e) => {
     setSearchTerm(e.target.value);
+  };
+
+  const handleLogoClick = () => {
+    navigate('/');
   };
 
   return (
@@ -26,6 +34,11 @@ const TopNavBar = ({ onMenuToggle, isMenuOpen }) => {
           <span></span>
           <span></span>
           <span></span>
+        </button>
+
+        {/* Logo */}
+        <button className="nav-logo" onClick={handleLogoClick}>
+          culinárea
         </button>
 
         {/* Search Bar */}

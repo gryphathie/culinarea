@@ -6,10 +6,14 @@ import SideMenu from './components/SideMenu';
 import HomePage from './components/pages/HomePage';
 import RecipesPage from './components/pages/RecipesPage';
 import RecipeDetailPage from './components/pages/RecipeDetailPage';
+import ProfilePage from './components/pages/ProfilePage';
+import SearchResultsPage from './components/pages/SearchResultsPage';
+import HelpPage from './components/pages/HelpPage';
 import AuthPage from './components/pages/AuthPage';
 import AdminCreateRecipe from './components/pages/AdminCreateRecipe';
 import AdminRecipesList from './components/pages/AdminRecipesList';
 import AdminEditRecipe from './components/pages/AdminEditRecipe';
+import AdminFeedbackList from './components/pages/AdminFeedbackList';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminProtectedRoute from './components/AdminProtectedRoute';
 
@@ -55,6 +59,21 @@ function AppContent() {
             <RecipeDetailPage />
           </ProtectedRoute>
         } />
+        <Route path="/buscar" element={
+          <ProtectedRoute>
+            <SearchResultsPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/perfil" element={
+          <ProtectedRoute>
+            <ProfilePage />
+          </ProtectedRoute>
+        } />
+        <Route path="/ayuda" element={
+          <ProtectedRoute>
+            <HelpPage />
+          </ProtectedRoute>
+        } />
         <Route path="/admin/create-recipe" element={
           <AdminProtectedRoute>
             <AdminCreateRecipe />
@@ -68,6 +87,11 @@ function AppContent() {
         <Route path="/admin/edit-recipe/:recipeId" element={
           <AdminProtectedRoute>
             <AdminEditRecipe />
+          </AdminProtectedRoute>
+        } />
+        <Route path="/admin/feedback" element={
+          <AdminProtectedRoute>
+            <AdminFeedbackList />
           </AdminProtectedRoute>
         } />
       </Routes>

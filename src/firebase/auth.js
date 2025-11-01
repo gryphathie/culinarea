@@ -6,7 +6,10 @@ import {
   signOut,
   onAuthStateChanged,
   updateProfile,
+  updatePassword,
   sendPasswordResetEmail,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
   GoogleAuthProvider,
   signInWithPopup
 } from 'firebase/auth';
@@ -72,6 +75,41 @@ export const authService = {
       await sendPasswordResetEmail(auth, email);
     } catch (error) {
       console.error('Error resetting password:', error);
+      throw error;
+    }
+  },
+
+  // Update user profile (display name)
+  async updateUserProfile(displayName) {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        throw new Error('No user is currently signed in');
+      }
+      await updateProfile(user, { displayName });
+      return user;
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      throw error;
+    }
+  },
+
+  // Update password
+  async updateUserPassword(newPassword, currentPassword) {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        throw new Error('No user is currently signed in');
+      }
+
+      // Re-authenticate user before updating password
+      const credential = EmailAuthProvider.credential(user.email, currentPassword);
+      await reauthenticateWithCredential(user, credential);
+
+      // Update password
+      await updatePassword(user, newPassword);
+    } catch (error) {
+      console.error('Error updating password:', error);
       throw error;
     }
   },
