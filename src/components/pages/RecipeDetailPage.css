@@ -1,0 +1,362 @@
+/* Recipe Detail Page Styles */
+.recipe-detail-page {
+  min-height: 100vh;
+  background-color: #F8F9FA;
+}
+
+.recipe-detail-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 0;
+  background-color: #FFFFFF;
+  min-height: 100vh;
+}
+
+/* Header */
+.recipe-detail-header {
+  display: flex;
+  align-items: center;
+  padding: 20px;
+  background-color: #FFFFFF;
+  border-bottom: 1px solid #E0E0E0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.back-icon-button {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #50B8B8;
+  cursor: pointer;
+  padding: 5px 10px;
+  margin-right: 10px;
+  transition: all 0.2s ease;
+}
+
+.back-icon-button:hover {
+  transform: translateX(-3px);
+  color: #3A9B9B;
+}
+
+.recipe-detail-title {
+  flex: 1;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #333333;
+  margin: 0;
+  text-align: center;
+}
+
+/* Pills (Category and Difficulty) */
+.recipe-pills {
+  display: flex;
+  gap: 10px;
+  padding: 15px 20px;
+  background-color: #FFFFFF;
+  border-bottom: 1px solid #E0E0E0;
+}
+
+.pill {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.category-pill {
+  background-color: #E0E0E0;
+  color: #333333;
+}
+
+.difficulty-pill {
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+/* Tab Navigation */
+.tab-navigation {
+  display: flex;
+  gap: 5px;
+  padding: 15px 20px;
+  background-color: #F8F9FA;
+  border-bottom: 1px solid #E0E0E0;
+}
+
+.tab-button {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  background-color: #E0E0E0;
+  color: #666666;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tab-button.active {
+  background-color: #50B8B8;
+  color: #FFFFFF;
+}
+
+.tab-button:hover:not(.active) {
+  background-color: #D0D0D0;
+}
+
+/* Content Area */
+.recipe-content {
+  padding: 20px;
+  background-color: #FFFFFF;
+}
+
+/* Sections */
+.section {
+  margin-bottom: 30px;
+}
+
+.section:last-child {
+  margin-bottom: 0;
+}
+
+.section-title {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #333333;
+  margin: 0 0 15px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Ingredients Box */
+.ingredients-box {
+  background-color: #E3F2FD;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 30px;
+}
+
+.ingredient-item {
+  padding: 8px 0;
+  color: #333333;
+  font-size: 1rem;
+  line-height: 1.5;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+  text-align: left;
+}
+
+.ingredient-item:last-child {
+  border-bottom: none;
+}
+
+/* Steps List */
+.steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.steps-section {
+  padding-top: 20px;
+  border-top: 2px solid #E0E0E0;
+  margin-top: 20px;
+}
+
+.step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  border-bottom: 1px solid #E0E0E0;
+  padding-bottom: 20px;
+}
+
+.step-badge {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 20px;
+  background-color: #50B8B8;
+  color: #FFFFFF;
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.step-text {
+  margin: 0;
+  color: #333333;
+  font-size: 1rem;
+  line-height: 1.6;
+  text-align: left;
+}
+
+.no-steps {
+  color: #999999;
+  font-style: italic;
+  text-align: center;
+  padding: 20px;
+}
+
+/* Activity Selection */
+.activity-selection {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 2px solid #E0E0E0;
+}
+
+.activity-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.activity-button {
+  flex: 1;
+  padding: 12px 20px;
+  border: 2px solid #E0E0E0;
+  border-radius: 25px;
+  background-color: #E3F2FD;
+  color: #50B8B8;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.activity-button.active {
+  background-color: #50B8B8;
+  color: #FFFFFF;
+  border-color: #50B8B8;
+}
+
+.activity-button:hover:not(.active) {
+  border-color: #50B8B8;
+  background-color: #BBDEFB;
+}
+
+/* Footer */
+.recipe-detail-footer {
+  text-align: center;
+  padding: 30px 20px;
+  background-color: #FFFFFF;
+  border-top: 1px solid #E0E0E0;
+}
+
+.logo {
+  color: #50B8B8;
+  font-size: 1.5rem;
+  font-weight: 600;
+  font-style: italic;
+}
+
+/* Error Container */
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  padding: 20px;
+}
+
+.error-message {
+  color: #C62828;
+  font-size: 1.1rem;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .recipe-detail-container {
+    padding: 0;
+  }
+
+  .recipe-detail-header {
+    padding: 15px;
+  }
+
+  .recipe-detail-title {
+    font-size: 1.2rem;
+  }
+
+  .recipe-pills {
+    padding: 12px 15px;
+  }
+
+  .pill {
+    font-size: 0.85rem;
+    padding: 5px 12px;
+  }
+
+  .tab-navigation {
+    padding: 12px 15px;
+    gap: 5px;
+  }
+
+  .tab-button {
+    padding: 10px 15px;
+    font-size: 0.85rem;
+  }
+
+  .recipe-content {
+    padding: 15px;
+  }
+
+  .section-title {
+    font-size: 1rem;
+  }
+
+  .ingredients-box {
+    padding: 15px;
+  }
+
+  .ingredient-item {
+    font-size: 0.95rem;
+  }
+
+  .step-badge {
+    font-size: 0.85rem;
+    padding: 6px 12px;
+  }
+
+  .step-text {
+    font-size: 0.95rem;
+  }
+
+  .activity-button {
+    padding: 10px 15px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .recipe-detail-title {
+    font-size: 1.1rem;
+  }
+
+  .back-icon-button {
+    font-size: 1.8rem;
+  }
+
+  .pill {
+    font-size: 0.8rem;
+  }
+
+  .tab-button {
+    font-size: 0.8rem;
+    padding: 8px 10px;
+  }
+
+  .ingredients-box {
+    padding: 12px;
+  }
+
+  .section {
+    margin-bottom: 20px;
+  }
+}
+
