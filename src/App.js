@@ -14,6 +14,7 @@ import AdminCreateRecipe from './components/pages/AdminCreateRecipe';
 import AdminRecipesList from './components/pages/AdminRecipesList';
 import AdminEditRecipe from './components/pages/AdminEditRecipe';
 import AdminFeedbackList from './components/pages/AdminFeedbackList';
+import CommunityChatPage from './components/pages/CommunityChatPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminProtectedRoute from './components/AdminProtectedRoute';
 
@@ -72,6 +73,11 @@ function AppContent() {
         <Route path="/ayuda" element={
           <ProtectedRoute>
             <HelpPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/chat" element={
+          <ProtectedRoute>
+            <CommunityChatPage />
           </ProtectedRoute>
         } />
         <Route path="/admin/create-recipe" element={

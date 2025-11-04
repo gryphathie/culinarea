@@ -11,7 +11,9 @@ import {
   query, 
   where, 
   orderBy,
-  limit 
+  limit,
+  onSnapshot,
+  serverTimestamp
 } from 'firebase/firestore';
 import { db } from './config';
 
@@ -237,6 +239,101 @@ export const userService = {
       const profile = await firestoreService.getById('users', userId);
       return profile?.role || null;
     } catch (error) {
+      return null;
+    }
+  }
+};
+
+// Chat-specific functions
+export const chatService = {
+  // Chat room categories
+  CHAT_CATEGORIES: [
+    { id: 'general', name: 'Chat General', icon: '💬', color: '#50B8B8' },
+    { id: 'recipes', name: 'Recetas', icon: '🍳', color: '#3A9B9B' },
+    { id: 'tips', name: 'Consejos y Trucos', icon: '💡', color: '#2A7A7A' },
+    { id: 'questions', name: 'Preguntas', icon: '❓', color: '#50B8B8' },
+    { id: 'events', name: 'Eventos', icon: '📅', color: '#3A9B9B' }
+  ],
+
+  // Send a message to a chat room
+  async sendMessage(roomId, userId, userName, messageText) {
+    try {
+      const messagesRef = collection(db, 'chatRooms', roomId, 'messages');
+      const messageData = {
+        userId,
+        userName,
+        text: messageText,
+        timestamp: serverTimestamp(),
+        createdAt: new Date()
+      };
+      const docRef = await addDoc(messagesRef, messageData);
+      return { id: docRef.id, ...messageData };
+    } catch (error) {
+      console.error('Error sending message:', error);
+      throw error;
+    }
+  },
+
+  // Subscribe to messages in a chat room (real-time updates)
+  subscribeToMessages(roomId, callback) {
+    const messagesRef = collection(db, 'chatRooms', roomId, 'messages');
+    const q = query(messagesRef, orderBy('timestamp', 'asc'));
+    
+    return onSnapshot(q, (snapshot) => {
+      const messages = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      callback(messages);
+    }, (error) => {
+      console.error('Error subscribing to messages:', error);
+      callback([]);
+    });
+  },
+
+  // Get all messages from a chat room (one-time fetch)
+  async getMessages(roomId) {
+    try {
+      const messagesRef = collection(db, 'chatRooms', roomId, 'messages');
+      const q = query(messagesRef, orderBy('timestamp', 'asc'));
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+    } catch (error) {
+      console.error('Error getting messages:', error);
+      throw error;
+    }
+  },
+
+  // Initialize a chat room if it doesn't exist
+  async initializeChatRoom(roomId, roomName) {
+    try {
+      const roomRef = doc(db, 'chatRooms', roomId);
+      const roomSnap = await getDoc(roomRef);
+      
+      if (!roomSnap.exists()) {
+        await setDoc(roomRef, {
+          id: roomId,
+          name: roomName,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+      }
+      return true;
+    } catch (error) {
+      console.error('Error initializing chat room:', error);
+      throw error;
+    }
+  },
+
+  // Get chat room info
+  async getChatRoom(roomId) {
+    try {
+      return await firestoreService.getById('chatRooms', roomId);
+    } catch (error) {
+      console.error('Error getting chat room:', error);
       return null;
     }
   }

@@ -100,7 +100,10 @@ const SideMenu = ({ isOpen, onClose }) => {
             </button>
           </li>
           <li>
-            <button onClick={onClose} className="menu-link">
+            <button onClick={() => {
+              onClose();
+              navigate('/chat');
+            }} className="menu-link">
               <span className="menu-icon">📢</span>
               Chat de la comunidad
             </button>

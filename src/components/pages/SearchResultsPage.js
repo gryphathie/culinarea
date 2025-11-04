@@ -13,11 +13,32 @@ const SearchResultsPage = () => {
 
   useEffect(() => {
     if (searchQuery) {
+      // Save search query to localStorage for recent searches
+      saveSearchToHistory(searchQuery);
       searchRecipes(searchQuery);
     } else {
       setLoading(false);
     }
   }, [searchQuery]);
+
+  const saveSearchToHistory = (query) => {
+    try {
+      const searchHistory = JSON.parse(localStorage.getItem('recipeSearchHistory') || '[]');
+      
+      // Remove if already exists (to avoid duplicates)
+      const filteredHistory = searchHistory.filter(item => item.toLowerCase() !== query.toLowerCase());
+      
+      // Add to beginning
+      filteredHistory.unshift(query);
+      
+      // Keep only last 10 searches
+      const limitedHistory = filteredHistory.slice(0, 10);
+      
+      localStorage.setItem('recipeSearchHistory', JSON.stringify(limitedHistory));
+    } catch (error) {
+      console.error('Error saving search history:', error);
+    }
+  };
 
   const searchRecipes = async (query) => {
     setLoading(true);

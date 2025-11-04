@@ -13,7 +13,9 @@ import {
   GoogleAuthProvider,
   signInWithPopup
 } from 'firebase/auth';
-import { auth } from './config';
+import { doc, getDoc } from 'firebase/firestore';
+import { auth, db } from './config';
+import { userService } from './services';
 
 // Authentication service
 export const authService = {
@@ -40,6 +42,25 @@ export const authService = {
         });
       }
       
+      // Create user document in Firestore
+      const userId = userCredential.user.uid;
+      try {
+        // Check if user document already exists
+        const userDocRef = doc(db, 'users', userId);
+        const userDocSnap = await getDoc(userDocRef);
+        
+        if (!userDocSnap.exists()) {
+          // Create user profile (regular user by default, role can be set later if needed)
+          await userService.createUserProfile(userId, {
+            email: email,
+            displayName: displayName || userCredential.user.displayName || ''
+          });
+        }
+      } catch (profileError) {
+        // Log error but don't fail registration if profile creation fails
+        console.error('Error creating user profile:', profileError);
+      }
+      
       return userCredential.user;
     } catch (error) {
       console.error('Error signing up:', error);
@@ -52,7 +73,28 @@ export const authService = {
     try {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
-      return result.user;
+      const user = result.user;
+      
+      // Create user document in Firestore if it doesn't exist
+      const userId = user.uid;
+      try {
+        // Check if user document already exists
+        const userDocRef = doc(db, 'users', userId);
+        const userDocSnap = await getDoc(userDocRef);
+        
+        if (!userDocSnap.exists()) {
+          // Create user profile for first-time Google sign-in (regular user by default, role can be set later if needed)
+          await userService.createUserProfile(userId, {
+            email: user.email || '',
+            displayName: user.displayName || ''
+          });
+        }
+      } catch (profileError) {
+        // Log error but don't fail sign-in if profile creation fails
+        console.error('Error creating user profile:', profileError);
+      }
+      
+      return user;
     } catch (error) {
       console.error('Error signing in with Google:', error);
       throw error;

@@ -1,9 +1,11 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './HomePage.css';
 
 const HomePage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [recentSearches, setRecentSearches] = useState([]);
 
   const mainCards = [
     {
@@ -29,26 +31,48 @@ const HomePage = () => {
     }
   ];
 
-  const recentRecipes = [
-    {
-      id: 1,
-      name: 'Recientes',
-      isActive: true,
-      type: 'recent'
-    },
-    {
-      id: 2,
-      name: 'Recetas para la escuela',
-      isActive: false,
-      type: 'category'
-    },
-    {
-      id: 3,
-      name: 'Pelador',
-      isActive: false,
-      type: 'category'
-    }
-  ];
+  // Load recent searches from localStorage
+  // Refresh when user navigates back to home page
+  useEffect(() => {
+    const loadRecentSearches = () => {
+      try {
+        const searchHistory = JSON.parse(localStorage.getItem('recipeSearchHistory') || '[]');
+        // Get the last 3 searches
+        const lastThreeSearches = searchHistory.slice(0, 3).map((search, index) => ({
+          id: index + 1,
+          name: search,
+          isActive: index === 0,
+          type: 'search'
+        }));
+        
+        // If there are no searches, show default placeholder
+        if (lastThreeSearches.length === 0) {
+          setRecentSearches([
+            {
+              id: 1,
+              name: 'Recientes',
+              isActive: true,
+              type: 'placeholder'
+            }
+          ]);
+        } else {
+          setRecentSearches(lastThreeSearches);
+        }
+      } catch (error) {
+        console.error('Error loading search history:', error);
+        setRecentSearches([
+          {
+            id: 1,
+            name: 'Recientes',
+            isActive: true,
+            type: 'placeholder'
+          }
+        ]);
+      }
+    };
+
+    loadRecentSearches();
+  }, [location.pathname]); // Refresh when pathname changes (when user returns to home)
 
   const futureEvents = [
     {
@@ -77,6 +101,8 @@ const HomePage = () => {
   const handleCardClick = (link) => {
     if (link === '/recetas') {
       navigate('/recetas');
+    } else if (link === '/chat') {
+      navigate('/chat');
     } else {
       // For other links, you can add more routes later
       console.log(`Navigating to: ${link}`);
@@ -84,7 +110,12 @@ const HomePage = () => {
   };
 
   const handleRecipeClick = (recipe) => {
-    console.log(`Clicked recipe: ${recipe.name}`);
+    // If it's a search item, navigate to search results
+    if (recipe.type === 'search') {
+      navigate(`/buscar?q=${encodeURIComponent(recipe.name)}`);
+    } else {
+      console.log(`Clicked recipe: ${recipe.name}`);
+    }
   };
 
   return (
@@ -93,7 +124,7 @@ const HomePage = () => {
         {/* Recent Recipes Section */}
         <div className="recent-recipes-section">
           <div className="recent-recipes-list">
-            {recentRecipes.map((recipe) => (
+            {recentSearches.map((recipe) => (
               <button
                 key={recipe.id}
                 className={`recipe-pill ${recipe.isActive ? 'active' : ''}`}
