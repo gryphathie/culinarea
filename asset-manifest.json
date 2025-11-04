@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/culinarea/static/css/main.eaea2f6c.css",
+    "main.js": "/culinarea/static/js/main.faed8624.js",
+    "static/js/453.87f44ff2.chunk.js": "/culinarea/static/js/453.87f44ff2.chunk.js",
+    "index.html": "/culinarea/index.html",
+    "main.eaea2f6c.css.map": "/culinarea/static/css/main.eaea2f6c.css.map",
+    "main.faed8624.js.map": "/culinarea/static/js/main.faed8624.js.map",
+    "453.87f44ff2.chunk.js.map": "/culinarea/static/js/453.87f44ff2.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.eaea2f6c.css",
+    "static/js/main.faed8624.js"
+  ]
+}
