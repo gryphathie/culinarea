@@ -13,7 +13,7 @@ const HomePage = () => {
       title: 'Guía',
       description: 'Aprende a usar la aplicación',
       color: '#50B8B8',
-      link: '/guia'
+      link: '/ayuda'
     },
     {
       id: 'recetas',
@@ -103,6 +103,8 @@ const HomePage = () => {
       navigate('/recetas');
     } else if (link === '/chat') {
       navigate('/chat');
+    } else if (link === '/ayuda') {
+      navigate('/ayuda');
     } else {
       // For other links, you can add more routes later
       console.log(`Navigating to: ${link}`);

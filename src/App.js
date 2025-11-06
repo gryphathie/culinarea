@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import './App.css';
 import TopNavBar from './components/TopNavBar';
 import SideMenu from './components/SideMenu';
@@ -100,6 +100,8 @@ function AppContent() {
             <AdminFeedbackList />
           </AdminProtectedRoute>
         } />
+        {/* Catch-all route: redirect any unknown routes to homepage */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
   );

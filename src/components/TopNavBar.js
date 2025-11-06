@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './TopNavBar.css';
+import logo from './img/logo.png';
 
 const TopNavBar = ({ onMenuToggle, isMenuOpen }) => {
   const navigate = useNavigate();
@@ -38,7 +39,8 @@ const TopNavBar = ({ onMenuToggle, isMenuOpen }) => {
 
         {/* Logo */}
         <button className="nav-logo" onClick={handleLogoClick}>
-          culinárea
+          <span className="nav-logo-text">culinárea</span>
+          <img src={logo} alt="culinárea" className="nav-logo-img" />
         </button>
 
         {/* Search Bar */}
