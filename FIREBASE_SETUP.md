@@ -47,11 +47,68 @@
 3. Select a location for your database
 4. Click "Done"
 
-### Storage (Optional)
+### Storage (Required for Image Uploads)
 1. Go to "Storage" > "Get started"
 2. Choose "Start in test mode" (for development)
 3. Select a location for your storage
 4. Click "Done"
+
+**Important: Configure CORS for Storage**
+Firebase Storage requires CORS configuration to allow image uploads from web browsers. You need to set up CORS rules for your storage bucket.
+
+#### Option 1: Using gsutil (Recommended)
+1. Install Google Cloud SDK if you haven't already:
+   - Download from: https://cloud.google.com/sdk/docs/install
+   - Or install via Homebrew (Mac): `brew install google-cloud-sdk`
+   
+2. Authenticate with Google Cloud:
+   ```bash
+   gcloud auth login
+   ```
+
+3. Create a CORS configuration file named `cors.json`:
+   ```json
+   [
+     {
+       "origin": ["http://localhost:3000", "http://localhost:3001", "https://your-production-domain.com"],
+       "method": ["GET", "POST", "PUT", "DELETE", "HEAD"],
+       "maxAgeSeconds": 3600,
+       "responseHeader": ["Content-Type", "Authorization"]
+     }
+   ]
+   ```
+
+4. Apply the CORS configuration to your storage bucket:
+   ```bash
+   gsutil cors set cors.json gs://YOUR_STORAGE_BUCKET_NAME
+   ```
+   Replace `YOUR_STORAGE_BUCKET_NAME` with your actual bucket name (usually `your-project-id.appspot.com`)
+
+#### Option 2: Using Firebase Console (Limited)
+Unfortunately, Firebase Console doesn't provide a direct UI for CORS configuration. You'll need to use gsutil (Option 1) or the Google Cloud Console.
+
+#### Option 3: Using Google Cloud Console
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Select your Firebase project
+3. Navigate to "Cloud Storage" > "Buckets"
+4. Click on your storage bucket
+5. Go to the "Configuration" tab
+6. Scroll to "CORS configuration"
+7. Click "Edit CORS configuration"
+8. Add the following JSON:
+   ```json
+   [
+     {
+       "origin": ["http://localhost:3000", "http://localhost:3001", "https://your-production-domain.com"],
+       "method": ["GET", "POST", "PUT", "DELETE", "HEAD"],
+       "maxAgeSeconds": 3600,
+       "responseHeader": ["Content-Type", "Authorization"]
+     }
+   ]
+   ```
+9. Click "Save"
+
+**Note:** Make sure to add your production domain when you deploy your app!
 
 ## 5. Security Rules (Important!)
 
@@ -139,7 +196,21 @@ const newRecipe = await recipeService.createRecipe({
 
 ## Troubleshooting
 
+### Common Issues
+
+#### CORS Errors When Uploading Images
+If you see errors like "Access to XMLHttpRequest... blocked by CORS policy" when uploading images:
+1. **Verify CORS is configured**: Make sure you've set up CORS rules for your storage bucket (see Storage setup above)
+2. **Check your bucket name**: Ensure `REACT_APP_FIREBASE_STORAGE_BUCKET` in your `.env.local` matches your actual bucket name
+3. **Verify origins**: Make sure your current origin (e.g., `http://localhost:3000`) is included in the CORS configuration
+4. **Test CORS configuration**: You can verify your CORS setup by running:
+   ```bash
+   gsutil cors get gs://YOUR_STORAGE_BUCKET_NAME
+   ```
+
+#### Other Common Issues
 - Make sure all environment variables are correctly set
 - Check Firebase Console for any service errors
 - Verify your Firebase project is properly configured
 - Check browser console for detailed error messages
+- Restart your development server after changing environment variables

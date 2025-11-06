@@ -158,6 +158,15 @@ const RecipesPage = () => {
                   className="recipe-card"
                   onClick={() => handleRecipeClick(recipe.id)}
                 >
+                  {recipe.imageUrl && (
+                    <div className="recipe-card-image-container">
+                      <img 
+                        src={recipe.imageUrl} 
+                        alt={recipe.title} 
+                        className="recipe-card-image"
+                      />
+                    </div>
+                  )}
                   <div className="recipe-card-header">
                     <span className="recipe-type-badge" style={{ backgroundColor: recipeTypes.find(t => t.id === recipe.type)?.color || '#50B8B8' }}>
                       {recipeTypes.find(t => t.id === recipe.type)?.name || recipe.type}

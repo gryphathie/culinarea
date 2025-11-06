@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { recipeService } from '../../firebase/services';
+import { recipeService, imageService } from '../../firebase/services';
 import './AdminCreateRecipe.css';
 
 const AdminEditRecipe = () => {
@@ -10,6 +10,10 @@ const AdminEditRecipe = () => {
   const [loadingData, setLoadingData] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [existingImageUrl, setExistingImageUrl] = useState(null);
+  const [existingImagePath, setExistingImagePath] = useState(null);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -53,6 +57,12 @@ const AdminEditRecipe = () => {
         stepsChildren: Array.isArray(recipe.stepsChildren) ? recipe.stepsChildren.join('\n') : '',
         stepsAdults: Array.isArray(recipe.stepsAdults) ? recipe.stepsAdults.join('\n') : ''
       });
+      
+      // Set existing image if available
+      if (recipe.imageUrl) {
+        setExistingImageUrl(recipe.imageUrl);
+        setExistingImagePath(recipe.imagePath || null);
+      }
     } catch (err) {
       console.error('Error loading recipe:', err);
       setError('Error al cargar la receta');
@@ -67,6 +77,40 @@ const AdminEditRecipe = () => {
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setError('Por favor selecciona un archivo de imagen válido');
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('La imagen debe ser menor a 5MB');
+        return;
+      }
+
+      setImageFile(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+      setError('');
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+    setExistingImageUrl(null);
+    setExistingImagePath(null);
   };
 
   const clearMessages = () => {
@@ -105,7 +149,7 @@ const AdminEditRecipe = () => {
         .filter(line => line.length > 0);
 
       // Create recipe data object
-      const recipeData = {
+      let recipeData = {
         title: formData.title,
         ingredients: ingredientsList,
         difficulty: formData.difficulty,
@@ -113,6 +157,51 @@ const AdminEditRecipe = () => {
         stepsChildren: stepsChildrenList,
         stepsAdults: stepsAdultsList
       };
+
+      // Handle image upload/update
+      if (imageFile) {
+        // Delete old image if it exists
+        if (existingImagePath) {
+          try {
+            await imageService.deleteImage(existingImagePath);
+          } catch (error) {
+            console.error('Error deleting old image:', error);
+            // Continue even if deletion fails
+          }
+        }
+        
+        // Upload new image
+        const imageResult = await imageService.uploadRecipeImage(imageFile, recipeId);
+        recipeData = {
+          ...recipeData,
+          imageUrl: imageResult.url,
+          imagePath: imageResult.path
+        };
+      } else if (existingImageUrl) {
+        // Keep existing image
+        recipeData = {
+          ...recipeData,
+          imageUrl: existingImageUrl,
+          imagePath: existingImagePath
+        };
+      } else {
+        // No image - remove image fields
+        recipeData = {
+          ...recipeData,
+          imageUrl: null,
+          imagePath: null
+        };
+        
+        // Delete old image if it existed
+        if (existingImagePath) {
+          try {
+            await imageService.deleteImage(existingImagePath);
+          } catch (error) {
+            console.error('Error deleting old image:', error);
+            // Continue even if deletion fails
+          }
+        }
+      }
 
       // Update recipe in Firestore
       await recipeService.updateRecipe(recipeId, recipeData);
@@ -245,6 +334,62 @@ const AdminEditRecipe = () => {
                 </option>
               ))}
             </select>
+          </div>
+
+          {/* Image Upload */}
+          <div className="form-group">
+            <label htmlFor="image">Imagen de la receta</label>
+            {imagePreview ? (
+              <div className="image-preview-container">
+                <img src={imagePreview} alt="Preview" className="image-preview" />
+                <button
+                  type="button"
+                  className="remove-image-button"
+                  onClick={handleRemoveImage}
+                >
+                  ✕ Eliminar imagen
+                </button>
+              </div>
+            ) : existingImageUrl ? (
+              <div className="image-preview-container">
+                <img src={existingImageUrl} alt="Current recipe" className="image-preview" />
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <label htmlFor="image" className="image-upload-label" style={{ margin: 0 }}>
+                    📷 Cambiar imagen
+                  </label>
+                  <input
+                    type="file"
+                    id="image"
+                    name="image"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="image-input"
+                  />
+                  <button
+                    type="button"
+                    className="remove-image-button"
+                    onClick={handleRemoveImage}
+                  >
+                    ✕ Eliminar imagen
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="image-upload-container">
+                <input
+                  type="file"
+                  id="image"
+                  name="image"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="image-input"
+                />
+                <label htmlFor="image" className="image-upload-label">
+                  📷 Seleccionar imagen
+                </label>
+                <small>Formatos aceptados: JPG, PNG, WEBP (máx. 5MB)</small>
+              </div>
+            )}
           </div>
 
           {/* Steps for Children */}

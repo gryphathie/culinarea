@@ -49,6 +49,22 @@
   text-align: center;
 }
 
+/* Recipe Image */
+.recipe-image-container {
+  width: 100%;
+  padding: 0;
+  background-color: #FFFFFF;
+  border-bottom: 1px solid #E0E0E0;
+}
+
+.recipe-image {
+  width: 100%;
+  height: auto;
+  max-height: 400px;
+  object-fit: cover;
+  display: block;
+}
+
 /* Pills (Category and Difficulty) */
 .recipe-pills {
   display: flex;

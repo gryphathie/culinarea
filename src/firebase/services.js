@@ -15,7 +15,8 @@ import {
   onSnapshot,
   serverTimestamp
 } from 'firebase/firestore';
-import { db } from './config';
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { db, storage } from './config';
 
 // Generic CRUD operations
 export const firestoreService = {
@@ -170,7 +171,79 @@ export const recipeService = {
 
   // Delete a recipe
   async deleteRecipe(id) {
+    // Get recipe to check if it has an image
+    const recipe = await this.getRecipeById(id);
+    
+    // Delete image from storage if it exists
+    if (recipe.imageUrl) {
+      try {
+        // Extract path from URL or use imagePath if available
+        const imagePath = recipe.imagePath || this.extractPathFromUrl(recipe.imageUrl);
+        if (imagePath) {
+          const imageRef = ref(storage, imagePath);
+          await deleteObject(imageRef);
+        }
+      } catch (error) {
+        console.error('Error deleting recipe image:', error);
+        // Continue with recipe deletion even if image deletion fails
+      }
+    }
+    
     return await firestoreService.delete('recipes', id);
+  },
+
+  // Helper to extract storage path from URL
+  extractPathFromUrl(url) {
+    try {
+      // Firebase Storage URLs typically contain the path after /o/
+      const match = url.match(/\/o\/(.+?)\?/);
+      if (match) {
+        return decodeURIComponent(match[1]);
+      }
+      return null;
+    } catch (error) {
+      return null;
+    }
+  }
+};
+
+// Image upload service
+export const imageService = {
+  // Upload an image file to Firebase Storage
+  async uploadRecipeImage(file, recipeId) {
+    try {
+      // Create a unique filename
+      const timestamp = Date.now();
+      const fileName = `recipes/${recipeId}_${timestamp}_${file.name}`;
+      const storageRef = ref(storage, fileName);
+      
+      // Upload the file
+      await uploadBytes(storageRef, file);
+      
+      // Get the download URL
+      const downloadURL = await getDownloadURL(storageRef);
+      
+      return {
+        url: downloadURL,
+        path: fileName
+      };
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      throw error;
+    }
+  },
+
+  // Delete an image from Firebase Storage
+  async deleteImage(imagePath) {
+    try {
+      if (!imagePath) return;
+      
+      const imageRef = ref(storage, imagePath);
+      await deleteObject(imageRef);
+    } catch (error) {
+      console.error('Error deleting image:', error);
+      throw error;
+    }
   }
 };
 
@@ -256,7 +329,7 @@ export const chatService = {
   ],
 
   // Send a message to a chat room
-  async sendMessage(roomId, userId, userName, messageText) {
+  async sendMessage(roomId, userId, userName, messageText, imageUrl = null) {
     try {
       const messagesRef = collection(db, 'chatRooms', roomId, 'messages');
       const messageData = {
@@ -266,10 +339,40 @@ export const chatService = {
         timestamp: serverTimestamp(),
         createdAt: new Date()
       };
+      
+      // Add image URL if provided
+      if (imageUrl) {
+        messageData.imageUrl = imageUrl;
+      }
+      
       const docRef = await addDoc(messagesRef, messageData);
       return { id: docRef.id, ...messageData };
     } catch (error) {
       console.error('Error sending message:', error);
+      throw error;
+    }
+  },
+
+  // Upload an image for chat
+  async uploadChatImage(file, roomId, userId) {
+    try {
+      // Create a unique filename
+      const timestamp = Date.now();
+      const fileName = `chat/${roomId}/${userId}_${timestamp}_${file.name}`;
+      const storageRef = ref(storage, fileName);
+      
+      // Upload the file
+      await uploadBytes(storageRef, file);
+      
+      // Get the download URL
+      const downloadURL = await getDownloadURL(storageRef);
+      
+      return {
+        url: downloadURL,
+        path: fileName
+      };
+    } catch (error) {
+      console.error('Error uploading chat image:', error);
       throw error;
     }
   },
