@@ -10,8 +10,12 @@ const CommunityChatPage = () => {
   const [messageText, setMessageText] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
   const messagesEndRef = useRef(null);
   const unsubscribeRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   // Get user display name
   const userName = user?.displayName || user?.email?.split('@')[0] || 'Usuario';
@@ -73,25 +77,85 @@ const CommunityChatPage = () => {
     };
   }, []);
 
+  // Handle image selection
+  const handleImageSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setError('Por favor selecciona un archivo de imagen válido');
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('La imagen debe ser menor a 5MB');
+        return;
+      }
+
+      setImageFile(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+      setError('');
+    }
+  };
+
+  // Remove selected image
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   // Handle sending a message
   const handleSendMessage = async (e) => {
     e.preventDefault();
     
-    if (!messageText.trim() || !user) {
+    if ((!messageText.trim() && !imageFile) || !user) {
       return;
     }
 
     const textToSend = messageText.trim();
     setMessageText('');
     setError('');
+    setUploadingImage(true);
 
     try {
-      await chatService.sendMessage(selectedRoom, user.uid, userName, textToSend);
+      let imageUrl = null;
+      
+      // Upload image if one is selected
+      if (imageFile) {
+        try {
+          const imageResult = await chatService.uploadChatImage(imageFile, selectedRoom, user.uid);
+          imageUrl = imageResult.url;
+        } catch (imgErr) {
+          console.error('Error uploading image:', imgErr);
+          setError('Error al subir la imagen. Por favor intenta de nuevo.');
+          setMessageText(textToSend);
+          setUploadingImage(false);
+          return;
+        }
+      }
+
+      // Send message with or without image
+      await chatService.sendMessage(selectedRoom, user.uid, userName, textToSend || '', imageUrl);
+      
+      // Clear image state
+      handleRemoveImage();
       // Message will be added via real-time subscription
     } catch (err) {
       console.error('Error sending message:', err);
       setError('Error al enviar el mensaje. Por favor intenta de nuevo.');
-      setMessageText(textToSend); // Restore message text
+      setMessageText(textToSend);
+    } finally {
+      setUploadingImage(false);
     }
   };
 
@@ -207,7 +271,19 @@ const CommunityChatPage = () => {
                         </div>
                         <div className="message-content">
                           <div className="message-author">{message.userName || 'Usuario'}</div>
-                          <div className="message-text">{message.text}</div>
+                          {message.imageUrl && (
+                            <div className="message-image-container">
+                              <img 
+                                src={message.imageUrl} 
+                                alt="Shared image" 
+                                className="message-image"
+                                loading="lazy"
+                              />
+                            </div>
+                          )}
+                          {message.text && (
+                            <div className="message-text">{message.text}</div>
+                          )}
                           <div className="message-time">
                             {formatTimestamp(message.timestamp || message.createdAt)}
                           </div>
@@ -222,22 +298,49 @@ const CommunityChatPage = () => {
 
             {/* Message Input */}
             <form className="message-input-form" onSubmit={handleSendMessage}>
-              <input
-                type="text"
-                className="message-input"
-                placeholder="Escribe un mensaje..."
-                value={messageText}
-                onChange={(e) => setMessageText(e.target.value)}
-                disabled={!user}
-              />
-              <button
-                type="submit"
-                className="send-button"
-                disabled={!messageText.trim() || !user}
-                style={{ backgroundColor: selectedRoomData?.color || '#50B8B8' }}
-              >
-                Enviar
-              </button>
+              {imagePreview && (
+                <div className="image-preview-chat">
+                  <img src={imagePreview} alt="Preview" className="preview-image" />
+                  <button
+                    type="button"
+                    className="remove-preview-button"
+                    onClick={handleRemoveImage}
+                    title="Eliminar imagen"
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
+              <div className="input-container">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  accept="image/*"
+                  onChange={handleImageSelect}
+                  className="file-input"
+                  id="chat-image-input"
+                  disabled={!user || uploadingImage}
+                />
+                <label htmlFor="chat-image-input" className="image-upload-button" title="Subir imagen">
+                  📷
+                </label>
+                <input
+                  type="text"
+                  className="message-input"
+                  placeholder="Escribe un mensaje..."
+                  value={messageText}
+                  onChange={(e) => setMessageText(e.target.value)}
+                  disabled={!user || uploadingImage}
+                />
+                <button
+                  type="submit"
+                  className="send-button"
+                  disabled={(!messageText.trim() && !imageFile) || !user || uploadingImage}
+                  style={{ backgroundColor: selectedRoomData?.color || '#50B8B8' }}
+                >
+                  {uploadingImage ? 'Subiendo...' : 'Enviar'}
+                </button>
+              </div>
             </form>
           </div>
         </div>

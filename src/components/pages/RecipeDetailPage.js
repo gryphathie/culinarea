@@ -102,6 +102,17 @@ const RecipeDetailPage = () => {
           <div></div> {/* Spacer for alignment */}
         </div>
 
+        {/* Recipe Image */}
+        {recipe.imageUrl && (
+          <div className="recipe-image-container">
+            <img 
+              src={recipe.imageUrl} 
+              alt={recipe.title} 
+              className="recipe-image"
+            />
+          </div>
+        )}
+
         {/* Category and Difficulty Pills */}
         <div className="recipe-pills">
           <span className="pill category-pill">{category}</span>

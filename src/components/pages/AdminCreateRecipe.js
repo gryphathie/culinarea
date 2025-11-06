@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { recipeService } from '../../firebase/services';
+import { recipeService, imageService } from '../../firebase/services';
 import './AdminCreateRecipe.css';
 
 const AdminCreateRecipe = () => {
@@ -8,6 +8,8 @@ const AdminCreateRecipe = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -38,6 +40,38 @@ const AdminCreateRecipe = () => {
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setError('Por favor selecciona un archivo de imagen válido');
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('La imagen debe ser menor a 5MB');
+        return;
+      }
+
+      setImageFile(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+      setError('');
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
   };
 
   const clearMessages = () => {
@@ -76,7 +110,7 @@ const AdminCreateRecipe = () => {
         .filter(line => line.length > 0);
 
       // Create recipe data object
-      const recipeData = {
+      let recipeData = {
         title: formData.title,
         ingredients: ingredientsList,
         difficulty: formData.difficulty,
@@ -85,8 +119,26 @@ const AdminCreateRecipe = () => {
         stepsAdults: stepsAdultsList
       };
 
-      // Save recipe to Firestore
-      await recipeService.createRecipe(recipeData);
+      // Upload image if provided
+      if (imageFile) {
+        // First create the recipe to get an ID
+        const newRecipe = await recipeService.createRecipe(recipeData);
+        
+        // Upload image using the recipe ID
+        const imageResult = await imageService.uploadRecipeImage(imageFile, newRecipe.id);
+        
+        // Update recipe with image URL and path
+        recipeData = {
+          ...recipeData,
+          imageUrl: imageResult.url,
+          imagePath: imageResult.path
+        };
+        
+        await recipeService.updateRecipe(newRecipe.id, recipeData);
+      } else {
+        // Save recipe to Firestore without image
+        await recipeService.createRecipe(recipeData);
+      }
       
       setSuccess('Receta creada exitosamente');
       
@@ -99,6 +151,8 @@ const AdminCreateRecipe = () => {
         stepsChildren: '',
         stepsAdults: ''
       });
+      setImageFile(null);
+      setImagePreview(null);
 
       // Redirect after 2 seconds
       setTimeout(() => {
@@ -207,6 +261,38 @@ const AdminCreateRecipe = () => {
                 </option>
               ))}
             </select>
+          </div>
+
+          {/* Image Upload */}
+          <div className="form-group">
+            <label htmlFor="image">Imagen de la receta</label>
+            {imagePreview ? (
+              <div className="image-preview-container">
+                <img src={imagePreview} alt="Preview" className="image-preview" />
+                <button
+                  type="button"
+                  className="remove-image-button"
+                  onClick={handleRemoveImage}
+                >
+                  ✕ Eliminar imagen
+                </button>
+              </div>
+            ) : (
+              <div className="image-upload-container">
+                <input
+                  type="file"
+                  id="image"
+                  name="image"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="image-input"
+                />
+                <label htmlFor="image" className="image-upload-label">
+                  📷 Seleccionar imagen
+                </label>
+                <small>Formatos aceptados: JPG, PNG, WEBP (máx. 5MB)</small>
+              </div>
+            )}
           </div>
 
           {/* Steps for Children */}
