@@ -37,17 +37,15 @@ const RecipesPage = () => {
     try {
       let allRecipes = [];
       
+      // Only load recipes when both difficulty and type are selected
       if (selectedFilter.type && selectedFilter.difficulty) {
         allRecipes = await recipeService.getRecipesByTypeAndDifficulty(
           selectedFilter.type,
           selectedFilter.difficulty
         );
-      } else if (selectedFilter.type) {
-        allRecipes = await recipeService.getRecipesByType(selectedFilter.type);
-      } else if (selectedFilter.difficulty) {
-        allRecipes = await recipeService.getRecipesByDifficulty(selectedFilter.difficulty);
       } else {
-        allRecipes = await recipeService.getAllRecipes();
+        // Don't show any recipes until both filters are selected
+        allRecipes = [];
       }
       
       setRecipes(allRecipes);
@@ -66,10 +64,17 @@ const RecipesPage = () => {
   };
 
   const handleDifficultyClick = (difficulty) => {
-    setSelectedFilter(prev => ({
-      ...prev,
-      difficulty: prev.difficulty === difficulty.id ? null : difficulty.id
-    }));
+    setSelectedFilter(prev => {
+      // If clicking the same difficulty, deselect it and clear type
+      if (prev.difficulty === difficulty.id) {
+        return { type: null, difficulty: null };
+      }
+      // Otherwise, set the difficulty and clear type
+      return {
+        type: null,
+        difficulty: difficulty.id
+      };
+    });
   };
 
   const handleRecipeClick = (recipeId) => {
@@ -114,22 +119,6 @@ const RecipesPage = () => {
           <h1 className="recipes-title">Recetas</h1>
         </div>
 
-        {/* Recipe Types Section */}
-        <div className="recipe-types-section">
-          <div className="recipe-types-grid">
-            {recipeTypes.map((type) => (
-              <button
-                key={type.id}
-                className={`recipe-type-card ${selectedFilter.type === type.id ? 'active' : ''}`}
-                style={{ backgroundColor: type.color }}
-                onClick={() => handleRecipeTypeClick(type)}
-              >
-                <span className="recipe-type-name">{type.name}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
         {/* Difficulty Section */}
         <div className="difficulty-section">
           <div className="difficulty-container">
@@ -147,6 +136,24 @@ const RecipesPage = () => {
             </div>
           </div>
         </div>
+
+        {/* Recipe Types Section - Only show when a difficulty is selected */}
+        {selectedFilter.difficulty && (
+          <div className="recipe-types-section">
+            <div className="recipe-types-grid">
+              {recipeTypes.map((type) => (
+                <button
+                  key={type.id}
+                  className={`recipe-type-card ${selectedFilter.type === type.id ? 'active' : ''}`}
+                  style={{ backgroundColor: type.color }}
+                  onClick={() => handleRecipeTypeClick(type)}
+                >
+                  <span className="recipe-type-name">{type.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Recipes Grid */}
         {displayedRecipes.length > 0 && (

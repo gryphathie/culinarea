@@ -10,6 +10,12 @@ const RecipeDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('adult'); // 'adult' or 'child'
+  const [isReadingIngredients, setIsReadingIngredients] = useState(false);
+  const [isReadingSteps, setIsReadingSteps] = useState(false);
+  const [speechSynthesis, setSpeechSynthesis] = useState(null);
+  const [availableVoices, setAvailableVoices] = useState([]);
+  const [selectedVoice, setSelectedVoice] = useState(null);
+  const [showVoiceMenu, setShowVoiceMenu] = useState(false);
 
   const difficultyLabels = {
     beginner: 'NIVEL PRINCIPIANTE',
@@ -32,6 +38,46 @@ const RecipeDetailPage = () => {
 
   useEffect(() => {
     loadRecipe();
+    // Initialize speech synthesis
+    if ('speechSynthesis' in window) {
+      const synth = window.speechSynthesis;
+      setSpeechSynthesis(synth);
+      
+      // Load voices (may need to wait for voices to be loaded)
+      const loadVoices = () => {
+        const voices = synth.getVoices();
+        // Filter and prioritize Spanish voices
+        const spanishVoices = voices.filter(voice => 
+          voice.lang.startsWith('es') || voice.name.toLowerCase().includes('spanish')
+        );
+        const otherVoices = voices.filter(voice => 
+          !voice.lang.startsWith('es') && !voice.name.toLowerCase().includes('spanish')
+        );
+        
+        // Combine: Spanish voices first, then others
+        const sortedVoices = [...spanishVoices, ...otherVoices];
+        setAvailableVoices(sortedVoices);
+        
+        // Set default to first Spanish voice, or first available voice
+        if (sortedVoices.length > 0 && !selectedVoice) {
+          const defaultVoice = spanishVoices.length > 0 ? spanishVoices[0] : sortedVoices[0];
+          setSelectedVoice(defaultVoice);
+        }
+      };
+      
+      // Voices might be loaded asynchronously
+      loadVoices();
+      if (synth.onvoiceschanged !== undefined) {
+        synth.onvoiceschanged = loadVoices;
+      }
+    }
+    
+    // Cleanup: stop speech when component unmounts
+    return () => {
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    };
   }, [recipeId]);
 
   const loadRecipe = async () => {
@@ -50,6 +96,136 @@ const RecipeDetailPage = () => {
 
   const handleBackClick = () => {
     navigate('/recetas');
+  };
+
+  const speakText = (text, onStart, onEnd, onError) => {
+    if (!speechSynthesis || !recipe) return;
+
+    // Check if speech synthesis is supported
+    if (!('speechSynthesis' in window)) {
+      alert('Tu navegador no soporta la función de lectura en voz alta.');
+      return;
+    }
+
+    // Stop any ongoing speech
+    speechSynthesis.cancel();
+
+    // Create speech utterance
+    const utterance = new SpeechSynthesisUtterance(text);
+    
+    // Configure speech settings for better Spanish pronunciation
+    utterance.lang = 'es-ES';
+    utterance.rate = 0.9; // Slightly slower for children
+    utterance.pitch = 1.0;
+    utterance.volume = 1.0;
+    
+    // Use selected voice if available
+    if (selectedVoice) {
+      utterance.voice = selectedVoice;
+    }
+
+    // Handle speech events
+    utterance.onstart = onStart;
+    utterance.onend = onEnd;
+    utterance.onerror = onError;
+
+    // Start speaking
+    speechSynthesis.speak(utterance);
+  };
+
+  const handleReadIngredients = () => {
+    if (!speechSynthesis || !recipe) return;
+
+    if (isReadingIngredients) {
+      // Stop reading
+      speechSynthesis.cancel();
+      setIsReadingIngredients(false);
+      setIsReadingSteps(false);
+      return;
+    }
+
+    // Stop any other reading
+    if (isReadingSteps) {
+      speechSynthesis.cancel();
+      setIsReadingSteps(false);
+    }
+
+    // Get ingredients from recipe
+    const ingredients = Array.isArray(recipe.ingredients) ? recipe.ingredients : [];
+
+    // Build the text to read
+    let textToRead = '';
+
+    // Add recipe title
+    textToRead += `Receta: ${recipe.title}. `;
+
+    // Add ingredients
+    if (ingredients.length > 0) {
+      textToRead += 'Ingredientes: ';
+      ingredients.forEach((ingredient, index) => {
+        textToRead += `${ingredient}. `;
+      });
+    } else {
+      textToRead += 'No hay ingredientes disponibles.';
+    }
+
+    speakText(
+      textToRead,
+      () => setIsReadingIngredients(true),
+      () => setIsReadingIngredients(false),
+      (event) => {
+        console.error('Speech synthesis error:', event);
+        setIsReadingIngredients(false);
+        alert('Error al leer el texto. Por favor, intenta de nuevo.');
+      }
+    );
+  };
+
+  const handleReadSteps = () => {
+    if (!speechSynthesis || !recipe) return;
+
+    if (isReadingSteps) {
+      // Stop reading
+      speechSynthesis.cancel();
+      setIsReadingSteps(false);
+      setIsReadingIngredients(false);
+      return;
+    }
+
+    // Stop any other reading
+    if (isReadingIngredients) {
+      speechSynthesis.cancel();
+      setIsReadingIngredients(false);
+    }
+
+    // Get steps based on active tab
+    const adultSteps = Array.isArray(recipe.stepsAdults) ? recipe.stepsAdults : [];
+    const childSteps = Array.isArray(recipe.stepsChildren) ? recipe.stepsChildren : [];
+    const stepsToRead = activeTab === 'adult' ? adultSteps : childSteps;
+    const stepType = activeTab === 'adult' ? 'adulto' : 'niño';
+
+    // Build the text to read
+    let textToRead = '';
+
+    if (stepsToRead.length > 0) {
+      textToRead += `Pasos para ${stepType}: `;
+      stepsToRead.forEach((step, index) => {
+        textToRead += `Paso ${index + 1}: ${step}. `;
+      });
+    } else {
+      textToRead += `No hay pasos disponibles para ${stepType}.`;
+    }
+
+    speakText(
+      textToRead,
+      () => setIsReadingSteps(true),
+      () => setIsReadingSteps(false),
+      (event) => {
+        console.error('Speech synthesis error:', event);
+        setIsReadingSteps(false);
+        alert('Error al leer el texto. Por favor, intenta de nuevo.');
+      }
+    );
   };
 
   if (loading) {
@@ -99,8 +275,59 @@ const RecipeDetailPage = () => {
             ←
           </button>
           <h1 className="recipe-detail-title">{recipe.title}</h1>
-          <div></div> {/* Spacer for alignment */}
+          <div className="voice-controls">
+            {availableVoices.length > 0 && (
+              <button 
+                className="voice-select-button" 
+                onClick={() => setShowVoiceMenu(!showVoiceMenu)}
+                aria-label="Seleccionar voz"
+                title="Seleccionar voz"
+              >
+                ⚙️
+              </button>
+            )}
+          </div>
         </div>
+        
+        {/* Voice Selection Menu */}
+        {showVoiceMenu && availableVoices.length > 0 && (
+          <>
+            <div 
+              className="voice-menu-backdrop" 
+              onClick={() => setShowVoiceMenu(false)}
+              aria-label="Cerrar menú"
+            />
+            <div className="voice-menu">
+              <div className="voice-menu-header">
+                <h3>Seleccionar Voz</h3>
+                <button 
+                  className="voice-menu-close" 
+                  onClick={() => setShowVoiceMenu(false)}
+                  aria-label="Cerrar menú de voces"
+                >
+                  ×
+                </button>
+              </div>
+              <div className="voice-list">
+                {availableVoices.map((voice, index) => (
+                  <button
+                    key={index}
+                    className={`voice-option ${selectedVoice && selectedVoice.name === voice.name ? 'selected' : ''}`}
+                    onClick={() => {
+                      setSelectedVoice(voice);
+                      setShowVoiceMenu(false);
+                    }}
+                  >
+                    <span className="voice-name">{voice.name}</span>
+                    <span className="voice-info">
+                      {voice.lang} {voice.default && '(Predeterminada)'}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
 
         {/* Recipe Image */}
         {recipe.imageUrl && (
@@ -127,7 +354,17 @@ const RecipeDetailPage = () => {
         <div className="recipe-content">
           {/* Ingredients Section - Always visible */}
           <div className="section ingredients-section">
-            <h2 className="section-title">INGREDIENTES</h2>
+            <div className="section-title-container">
+              <h2 className="section-title">INGREDIENTES</h2>
+              <button 
+                className="section-read-button" 
+                onClick={handleReadIngredients}
+                aria-label={isReadingIngredients ? "Detener lectura" : "Leer título e ingredientes"}
+                title={isReadingIngredients ? "Detener lectura" : "Leer título e ingredientes"}
+              >
+                {isReadingIngredients ? '⏸' : '🔊'}
+              </button>
+            </div>
             <div className="ingredients-box">
               {ingredients.map((ingredient, index) => (
                 <div key={index} className="ingredient-item">
@@ -157,7 +394,18 @@ const RecipeDetailPage = () => {
           </div>
 
           {/* Steps Section - Depends on active tab */}
-          <div className="section steps-section">              
+          <div className="section steps-section">
+            <div className="section-title-container">
+              <h2 className="section-title">PASOS</h2>
+              <button 
+                className="section-read-button" 
+                onClick={handleReadSteps}
+                aria-label={isReadingSteps ? "Detener lectura" : "Leer pasos"}
+                title={isReadingSteps ? "Detener lectura" : "Leer pasos"}
+              >
+                {isReadingSteps ? '⏸' : '🔊'}
+              </button>
+            </div>
             <div className="steps-list">
               {activeTab === 'adult' && adultSteps.length > 0 ? (
                 adultSteps.map((step, index) => (
