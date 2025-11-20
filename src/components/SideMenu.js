@@ -114,6 +114,18 @@ const SideMenu = ({ isOpen, onClose }) => {
               Ayuda
             </button>
           </li>
+          <li>
+            <button onClick={handleHelpClick} className="menu-link">
+              <span className="menu-icon">🎥</span>
+              Video introductorio
+            </button>
+          </li>
+          <li>
+            <button onClick={handleHelpClick} className="menu-link">
+              <span className="menu-icon">📖</span>
+              Guía manual
+            </button>
+          </li>
           {isAdmin && (
             <>
               <li className="menu-divider">
