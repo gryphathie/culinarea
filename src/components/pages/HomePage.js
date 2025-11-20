@@ -147,8 +147,7 @@ const HomePage = () => {
               style={{ backgroundColor: card.color }}
               onClick={() => handleCardClick(card.link)}
             >
-              <h2 className="card-title">{card.title}</h2>
-              <p className="card-description">{card.description}</p>
+              <h2 className="card-title">{card.title}</h2>              
             </div>
           ))}
         </div>
