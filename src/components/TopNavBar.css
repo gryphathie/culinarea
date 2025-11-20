@@ -80,11 +80,24 @@
   transition: all 0.3s ease;
   text-decoration: none;
   margin-left: 20px;
+  display: flex;
+  align-items: center;
 }
 
 .nav-logo:hover {
   color: #3a9a9a;
   transform: scale(1.05);
+}
+
+.nav-logo-text {
+  display: block;
+}
+
+.nav-logo-img {
+  display: none;
+  height: 40px;
+  width: auto;
+  object-fit: contain;
 }
 
 /* Search Form */
@@ -169,6 +182,14 @@
   
   .hamburger {
     margin-left: -15px;
+  }
+  
+  .nav-logo-text {
+    display: none;
+  }
+  
+  .nav-logo-img {
+    display: block;
   }
   
   .search-form {
