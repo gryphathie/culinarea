@@ -37,14 +37,20 @@ const RecipesPage = () => {
     try {
       let allRecipes = [];
       
-      // Only load recipes when both difficulty and type are selected
+      // Load recipes based on selected filters
       if (selectedFilter.type && selectedFilter.difficulty) {
+        // Both filters selected: get recipes by type and difficulty
         allRecipes = await recipeService.getRecipesByTypeAndDifficulty(
           selectedFilter.type,
           selectedFilter.difficulty
         );
+      } else if (selectedFilter.difficulty) {
+        // Only difficulty selected: get all recipes with that difficulty
+        allRecipes = await recipeService.getRecipesByDifficulty(
+          selectedFilter.difficulty
+        );
       } else {
-        // Don't show any recipes until both filters are selected
+        // No filters selected: don't show any recipes
         allRecipes = [];
       }
       
