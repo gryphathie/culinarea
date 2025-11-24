@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { recipeService } from '../../firebase/services';
 import './RecipeDetailPage.css';
@@ -16,6 +16,10 @@ const RecipeDetailPage = () => {
   const [availableVoices, setAvailableVoices] = useState([]);
   const [selectedVoice, setSelectedVoice] = useState(null);
   const [showVoiceMenu, setShowVoiceMenu] = useState(false);
+  const [stepDelay, setStepDelay] = useState(3000); // Delay in milliseconds between steps (default: 3 seconds)
+  const [ingredientDelay, setIngredientDelay] = useState(1000); // Delay in milliseconds between ingredients (default: 1.5 seconds)
+  const isReadingStepsRef = useRef(false);
+  const isReadingIngredientsRef = useRef(false);
 
   const difficultyLabels = {
     beginner: 'NIVEL PRINCIPIANTE',
@@ -77,6 +81,8 @@ const RecipeDetailPage = () => {
       if (window.speechSynthesis) {
         window.speechSynthesis.cancel();
       }
+      isReadingStepsRef.current = false;
+      isReadingIngredientsRef.current = false;
     };
   }, [recipeId]);
 
@@ -133,12 +139,144 @@ const RecipeDetailPage = () => {
     speechSynthesis.speak(utterance);
   };
 
+  const readIngredientsSequentially = (recipeTitle, ingredients, currentIndex = -1) => {
+    if (!window.speechSynthesis) {
+      isReadingIngredientsRef.current = false;
+      setIsReadingIngredients(false);
+      return;
+    }
+
+    const synth = window.speechSynthesis;
+
+    // Read recipe title first (currentIndex === -1)
+    if (currentIndex === -1) {
+      const titleText = `Receta: ${recipeTitle}. `;
+      const utterance = new SpeechSynthesisUtterance(titleText);
+      utterance.lang = 'es-ES';
+      utterance.rate = 0.9;
+      utterance.pitch = 1.0;
+      utterance.volume = 1.0;
+      
+      if (selectedVoice) {
+        utterance.voice = selectedVoice;
+      }
+
+      utterance.onend = () => {
+        // Wait for delay, then read "Ingredientes:" and first ingredient
+        setTimeout(() => {
+          if (ingredients.length > 0 && isReadingIngredientsRef.current && window.speechSynthesis) {
+            // Read "Ingredientes:" introduction
+            const introText = 'Ingredientes: ';
+            const introUtterance = new SpeechSynthesisUtterance(introText);
+            introUtterance.lang = 'es-ES';
+            introUtterance.rate = 0.9;
+            introUtterance.pitch = 1.0;
+            introUtterance.volume = 1.0;
+            
+            if (selectedVoice) {
+              introUtterance.voice = selectedVoice;
+            }
+
+            introUtterance.onend = () => {
+              setTimeout(() => {
+                if (ingredients.length > 0 && isReadingIngredientsRef.current && window.speechSynthesis) {
+                  readIngredientsSequentially(recipeTitle, ingredients, 0);
+                } else {
+                  isReadingIngredientsRef.current = false;
+                  setIsReadingIngredients(false);
+                }
+              }, ingredientDelay);
+            };
+
+            introUtterance.onerror = (event) => {
+              if (event.error === 'interrupted' || event.error === 'canceled' || !isReadingIngredientsRef.current) {
+                isReadingIngredientsRef.current = false;
+                setIsReadingIngredients(false);
+                return;
+              }
+              console.error('Speech synthesis error:', event);
+              isReadingIngredientsRef.current = false;
+              setIsReadingIngredients(false);
+              alert('Error al leer el texto. Por favor, intenta de nuevo.');
+            };
+
+            synth.speak(introUtterance);
+          } else {
+            isReadingIngredientsRef.current = false;
+            setIsReadingIngredients(false);
+          }
+        }, ingredientDelay);
+      };
+
+      utterance.onerror = (event) => {
+        if (event.error === 'interrupted' || event.error === 'canceled' || !isReadingIngredientsRef.current) {
+          isReadingIngredientsRef.current = false;
+          setIsReadingIngredients(false);
+          return;
+        }
+        console.error('Speech synthesis error:', event);
+        isReadingIngredientsRef.current = false;
+        setIsReadingIngredients(false);
+        alert('Error al leer el texto. Por favor, intenta de nuevo.');
+      };
+
+      synth.speak(utterance);
+      return;
+    }
+
+    // Check if we've read all ingredients
+    if (currentIndex >= ingredients.length) {
+      isReadingIngredientsRef.current = false;
+      setIsReadingIngredients(false);
+      return;
+    }
+
+    // Read current ingredient
+    const ingredientText = `${ingredients[currentIndex]}. `;
+    const utterance = new SpeechSynthesisUtterance(ingredientText);
+    utterance.lang = 'es-ES';
+    utterance.rate = 0.9;
+    utterance.pitch = 1.0;
+    utterance.volume = 1.0;
+    
+    if (selectedVoice) {
+      utterance.voice = selectedVoice;
+    }
+
+    utterance.onend = () => {
+      // Wait for delay before reading next ingredient
+      setTimeout(() => {
+        if (isReadingIngredientsRef.current && currentIndex + 1 < ingredients.length && window.speechSynthesis) {
+          readIngredientsSequentially(recipeTitle, ingredients, currentIndex + 1);
+        } else {
+          isReadingIngredientsRef.current = false;
+          setIsReadingIngredients(false);
+        }
+      }, ingredientDelay);
+    };
+
+    utterance.onerror = (event) => {
+      if (event.error === 'interrupted' || event.error === 'canceled' || !isReadingIngredientsRef.current) {
+        isReadingIngredientsRef.current = false;
+        setIsReadingIngredients(false);
+        return;
+      }
+      console.error('Speech synthesis error:', event);
+      isReadingIngredientsRef.current = false;
+      setIsReadingIngredients(false);
+      alert('Error al leer el texto. Por favor, intenta de nuevo.');
+    };
+
+    synth.speak(utterance);
+  };
+
   const handleReadIngredients = () => {
     if (!speechSynthesis || !recipe) return;
 
     if (isReadingIngredients) {
       // Stop reading
       speechSynthesis.cancel();
+      isReadingIngredientsRef.current = false;
       setIsReadingIngredients(false);
       setIsReadingSteps(false);
       return;
@@ -147,38 +285,135 @@ const RecipeDetailPage = () => {
     // Stop any other reading
     if (isReadingSteps) {
       speechSynthesis.cancel();
+      isReadingStepsRef.current = false;
       setIsReadingSteps(false);
     }
 
     // Get ingredients from recipe
     const ingredients = Array.isArray(recipe.ingredients) ? recipe.ingredients : [];
 
-    // Build the text to read
-    let textToRead = '';
-
-    // Add recipe title
-    textToRead += `Receta: ${recipe.title}. `;
-
-    // Add ingredients
-    if (ingredients.length > 0) {
-      textToRead += 'Ingredientes: ';
-      ingredients.forEach((ingredient, index) => {
-        textToRead += `${ingredient}. `;
-      });
-    } else {
-      textToRead += 'No hay ingredientes disponibles.';
+    if (ingredients.length === 0) {
+      const noIngredientsText = 'No hay ingredientes disponibles.';
+      speakText(
+        noIngredientsText,
+        () => setIsReadingIngredients(true),
+        () => setIsReadingIngredients(false),
+        (event) => {
+          // Don't show error if it was intentionally cancelled or interrupted
+          if (event.error === 'interrupted' || event.error === 'canceled') {
+            setIsReadingIngredients(false);
+            return;
+          }
+          console.error('Speech synthesis error:', event);
+          setIsReadingIngredients(false);
+          alert('Error al leer el texto. Por favor, intenta de nuevo.');
+        }
+      );
+      return;
     }
 
-    speakText(
-      textToRead,
-      () => setIsReadingIngredients(true),
-      () => setIsReadingIngredients(false),
-      (event) => {
-        console.error('Speech synthesis error:', event);
-        setIsReadingIngredients(false);
-        alert('Error al leer el texto. Por favor, intenta de nuevo.');
+    // Start reading ingredients sequentially
+    isReadingIngredientsRef.current = true;
+    setIsReadingIngredients(true);
+    readIngredientsSequentially(recipe.title, ingredients, -1);
+  };
+
+  const readStepSequentially = (steps, stepType, currentIndex = -1) => {
+    if (!window.speechSynthesis) {
+      isReadingStepsRef.current = false;
+      setIsReadingSteps(false);
+      return;
+    }
+
+    const synth = window.speechSynthesis;
+
+    // Read introduction first (currentIndex === -1)
+    if (currentIndex === -1) {
+      const introText = `Pasos para ${stepType}: `;
+      const utterance = new SpeechSynthesisUtterance(introText);
+      utterance.lang = 'es-ES';
+      utterance.rate = 0.9;
+      utterance.pitch = 1.0;
+      utterance.volume = 1.0;
+      
+      if (selectedVoice) {
+        utterance.voice = selectedVoice;
       }
-    );
+
+      utterance.onend = () => {
+        // Wait for delay, then read first step
+        setTimeout(() => {
+          if (steps.length > 0 && isReadingStepsRef.current && window.speechSynthesis) {
+            readStepSequentially(steps, stepType, 0);
+          } else {
+            isReadingStepsRef.current = false;
+            setIsReadingSteps(false);
+          }
+        }, stepDelay);
+      };
+
+      utterance.onerror = (event) => {
+        // Don't show error if it was intentionally cancelled or interrupted
+        if (event.error === 'interrupted' || event.error === 'canceled' || !isReadingStepsRef.current) {
+          isReadingStepsRef.current = false;
+          setIsReadingSteps(false);
+          return;
+        }
+        console.error('Speech synthesis error:', event);
+        isReadingStepsRef.current = false;
+        setIsReadingSteps(false);
+        alert('Error al leer el texto. Por favor, intenta de nuevo.');
+      };
+
+      synth.speak(utterance);
+      return;
+    }
+
+    // Check if we've read all steps
+    if (currentIndex >= steps.length) {
+      isReadingStepsRef.current = false;
+      setIsReadingSteps(false);
+      return;
+    }
+
+    // Read current step
+    const stepText = `Paso ${currentIndex + 1}: ${steps[currentIndex]}. `;
+    const utterance = new SpeechSynthesisUtterance(stepText);
+    utterance.lang = 'es-ES';
+    utterance.rate = 0.9;
+    utterance.pitch = 1.0;
+    utterance.volume = 1.0;
+    
+    if (selectedVoice) {
+      utterance.voice = selectedVoice;
+    }
+
+    utterance.onend = () => {
+      // Wait for delay before reading next step
+      setTimeout(() => {
+        if (isReadingStepsRef.current && currentIndex + 1 < steps.length && window.speechSynthesis) {
+          readStepSequentially(steps, stepType, currentIndex + 1);
+        } else {
+          isReadingStepsRef.current = false;
+          setIsReadingSteps(false);
+        }
+      }, stepDelay);
+    };
+
+    utterance.onerror = (event) => {
+      // Don't show error if it was intentionally cancelled or interrupted
+      if (event.error === 'interrupted' || event.error === 'canceled' || !isReadingStepsRef.current) {
+        isReadingStepsRef.current = false;
+        setIsReadingSteps(false);
+        return;
+      }
+      console.error('Speech synthesis error:', event);
+      isReadingStepsRef.current = false;
+      setIsReadingSteps(false);
+      alert('Error al leer el texto. Por favor, intenta de nuevo.');
+    };
+
+    synth.speak(utterance);
   };
 
   const handleReadSteps = () => {
@@ -187,6 +422,7 @@ const RecipeDetailPage = () => {
     if (isReadingSteps) {
       // Stop reading
       speechSynthesis.cancel();
+      isReadingStepsRef.current = false;
       setIsReadingSteps(false);
       setIsReadingIngredients(false);
       return;
@@ -204,28 +440,30 @@ const RecipeDetailPage = () => {
     const stepsToRead = activeTab === 'adult' ? adultSteps : childSteps;
     const stepType = activeTab === 'adult' ? 'adulto' : 'niño';
 
-    // Build the text to read
-    let textToRead = '';
-
-    if (stepsToRead.length > 0) {
-      textToRead += `Pasos para ${stepType}: `;
-      stepsToRead.forEach((step, index) => {
-        textToRead += `Paso ${index + 1}: ${step}. `;
-      });
-    } else {
-      textToRead += `No hay pasos disponibles para ${stepType}.`;
+    if (stepsToRead.length === 0) {
+      const noStepsText = `No hay pasos disponibles para ${stepType}.`;
+      speakText(
+        noStepsText,
+        () => setIsReadingSteps(true),
+        () => setIsReadingSteps(false),
+        (event) => {
+          // Don't show error if it was intentionally cancelled or interrupted
+          if (event.error === 'interrupted' || event.error === 'canceled') {
+            setIsReadingSteps(false);
+            return;
+          }
+          console.error('Speech synthesis error:', event);
+          setIsReadingSteps(false);
+          alert('Error al leer el texto. Por favor, intenta de nuevo.');
+        }
+      );
+      return;
     }
 
-    speakText(
-      textToRead,
-      () => setIsReadingSteps(true),
-      () => setIsReadingSteps(false),
-      (event) => {
-        console.error('Speech synthesis error:', event);
-        setIsReadingSteps(false);
-        alert('Error al leer el texto. Por favor, intenta de nuevo.');
-      }
-    );
+    // Start reading steps sequentially
+    isReadingStepsRef.current = true;
+    setIsReadingSteps(true);
+    readStepSequentially(stepsToRead, stepType, -1);
   };
 
   if (loading) {
