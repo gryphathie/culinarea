@@ -1,0 +1,201 @@
+/* Manual Page Styles */
+.manual-page {
+  min-height: 100vh;
+  background-color: #F8F9FA;
+}
+
+.manual-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Header */
+.manual-header {
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  padding: 30px;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.manual-title {
+  color: #333333;
+  font-size: 2.2rem;
+  font-weight: bold;
+  margin: 0 0 15px 0;
+}
+
+.manual-subtitle {
+  color: #666666;
+  font-size: 1.1rem;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Content */
+.manual-content {
+  margin-bottom: 30px;
+}
+
+.manual-card {
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  padding: 40px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.manual-icon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+}
+
+.manual-card-title {
+  color: #333333;
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin: 0 0 20px 0;
+}
+
+.manual-card-description {
+  color: #666666;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0 0 30px 0;
+  max-width: 600px;
+}
+
+/* Download Button */
+.download-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 32px;
+  background-color: #50B8B8;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(80, 184, 184, 0.3);
+}
+
+.download-button:hover {
+  background-color: #3A9B9B;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(58, 155, 155, 0.4);
+}
+
+.download-button:active {
+  transform: translateY(0);
+}
+
+.download-icon {
+  font-size: 1.2rem;
+}
+
+/* Footer */
+.manual-footer {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.logo {
+  color: #50B8B8;
+  font-size: 1.5rem;
+  font-weight: 600;
+  font-style: italic;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .manual-container {
+    padding: 15px;
+  }
+  
+  .manual-header {
+    padding: 25px;
+    margin-bottom: 25px;
+  }
+
+  .manual-title {
+    font-size: 1.8rem;
+  }
+
+  .manual-subtitle {
+    font-size: 1rem;
+  }
+
+  .manual-card {
+    padding: 30px 25px;
+  }
+
+  .manual-icon {
+    font-size: 3rem;
+  }
+
+  .manual-card-title {
+    font-size: 1.5rem;
+  }
+
+  .manual-card-description {
+    font-size: 0.95rem;
+  }
+
+  .download-button {
+    padding: 14px 28px;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .manual-container {
+    padding: 12px;
+  }
+  
+  .manual-header {
+    padding: 20px;
+  }
+  
+  .manual-title {
+    font-size: 1.6rem;
+  }
+
+  .manual-subtitle {
+    font-size: 0.95rem;
+  }
+
+  .manual-card {
+    padding: 25px 20px;
+  }
+
+  .manual-icon {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+  }
+
+  .manual-card-title {
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+  }
+
+  .manual-card-description {
+    font-size: 0.9rem;
+    margin-bottom: 25px;
+  }
+
+  .download-button {
+    padding: 12px 24px;
+    font-size: 0.95rem;
+    width: 100%;
+    justify-content: center;
+  }
+}
+

@@ -9,6 +9,8 @@ import RecipeDetailPage from './components/pages/RecipeDetailPage';
 import ProfilePage from './components/pages/ProfilePage';
 import SearchResultsPage from './components/pages/SearchResultsPage';
 import HelpPage from './components/pages/HelpPage';
+import ManualPage from './components/pages/ManualPage';
+import VideoPage from './components/pages/VideoPage';
 import AuthPage from './components/pages/AuthPage';
 import AdminCreateRecipe from './components/pages/AdminCreateRecipe';
 import AdminRecipesList from './components/pages/AdminRecipesList';
@@ -73,6 +75,16 @@ function AppContent() {
         <Route path="/ayuda" element={
           <ProtectedRoute>
             <HelpPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/manual" element={
+          <ProtectedRoute>
+            <ManualPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/video" element={
+          <ProtectedRoute>
+            <VideoPage />
           </ProtectedRoute>
         } />
         <Route path="/chat" element={

@@ -1,0 +1,192 @@
+/* Video Page Styles */
+.video-page {
+  min-height: 100vh;
+  background-color: #F8F9FA;
+}
+
+.video-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Header */
+.video-header {
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  padding: 30px;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.video-title {
+  color: #333333;
+  font-size: 2.2rem;
+  font-weight: bold;
+  margin: 0 0 15px 0;
+}
+
+.video-subtitle {
+  color: #666666;
+  font-size: 1.1rem;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Content */
+.video-content {
+  margin-bottom: 30px;
+}
+
+.video-card {
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Video Wrapper */
+.video-wrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+  height: 0;
+  overflow: hidden;
+  border-radius: 8px;
+  background-color: #000000;
+}
+
+.video-iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* Placeholder */
+.video-placeholder {
+  text-align: center;
+  padding: 60px 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.placeholder-icon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+  opacity: 0.5;
+}
+
+.placeholder-title {
+  color: #333333;
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin: 0 0 15px 0;
+}
+
+.placeholder-description {
+  color: #666666;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0;
+  max-width: 500px;
+}
+
+/* Footer */
+.video-footer {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.logo {
+  color: #50B8B8;
+  font-size: 1.5rem;
+  font-weight: 600;
+  font-style: italic;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .video-container {
+    padding: 15px;
+  }
+  
+  .video-header {
+    padding: 25px;
+    margin-bottom: 25px;
+  }
+
+  .video-title {
+    font-size: 1.8rem;
+  }
+
+  .video-subtitle {
+    font-size: 1rem;
+  }
+
+  .video-card {
+    padding: 20px;
+  }
+
+  .video-placeholder {
+    padding: 40px 20px;
+  }
+
+  .placeholder-icon {
+    font-size: 3rem;
+    margin-bottom: 15px;
+  }
+
+  .placeholder-title {
+    font-size: 1.5rem;
+  }
+
+  .placeholder-description {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .video-container {
+    padding: 12px;
+  }
+  
+  .video-header {
+    padding: 20px;
+  }
+  
+  .video-title {
+    font-size: 1.6rem;
+  }
+
+  .video-subtitle {
+    font-size: 0.95rem;
+  }
+
+  .video-card {
+    padding: 15px;
+  }
+
+  .video-placeholder {
+    padding: 30px 15px;
+  }
+
+  .placeholder-icon {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+  }
+
+  .placeholder-title {
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+  }
+
+  .placeholder-description {
+    font-size: 0.9rem;
+  }
+}
+

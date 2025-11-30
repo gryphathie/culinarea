@@ -56,6 +56,16 @@ const SideMenu = ({ isOpen, onClose }) => {
     navigate('/ayuda'); // Navigate to help page
   };
 
+  const handleManualClick = () => {
+    onClose(); // Close the menu
+    navigate('/manual'); // Navigate to manual page
+  };
+
+  const handleVideoClick = () => {
+    onClose(); // Close the menu
+    navigate('/video'); // Navigate to video page
+  };
+
   const handleFeedbackManagementClick = () => {
     onClose(); // Close the menu
     navigate('/admin/feedback'); // Navigate to feedback management page
@@ -115,13 +125,13 @@ const SideMenu = ({ isOpen, onClose }) => {
             </button>
           </li>
           <li>
-            <button onClick={handleHelpClick} className="menu-link">
+            <button onClick={handleVideoClick} className="menu-link">
               <span className="menu-icon">🎥</span>
               Video introductorio
             </button>
           </li>
           <li>
-            <button onClick={handleHelpClick} className="menu-link">
+            <button onClick={handleManualClick} className="menu-link">
               <span className="menu-icon">📖</span>
               Guía manual
             </button>
