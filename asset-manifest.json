@@ -1,16 +1,16 @@
 {
   "files": {
     "main.css": "/culinarea/static/css/main.b061e3b8.css",
-    "main.js": "/culinarea/static/js/main.b7386935.js",
+    "main.js": "/culinarea/static/js/main.cd08002b.js",
     "static/js/453.87f44ff2.chunk.js": "/culinarea/static/js/453.87f44ff2.chunk.js",
     "static/media/logo.png": "/culinarea/static/media/logo.f5ad455f0b2ad45aee97.png",
     "index.html": "/culinarea/index.html",
     "main.b061e3b8.css.map": "/culinarea/static/css/main.b061e3b8.css.map",
-    "main.b7386935.js.map": "/culinarea/static/js/main.b7386935.js.map",
+    "main.cd08002b.js.map": "/culinarea/static/js/main.cd08002b.js.map",
     "453.87f44ff2.chunk.js.map": "/culinarea/static/js/453.87f44ff2.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.b061e3b8.css",
-    "static/js/main.b7386935.js"
+    "static/js/main.cd08002b.js"
   ]
 }
