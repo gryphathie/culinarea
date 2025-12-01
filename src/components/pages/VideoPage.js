@@ -4,7 +4,7 @@ import './VideoPage.css';
 // TODO: Replace this with your actual video URL when ready
 // For YouTube: Use embed URL format: https://www.youtube.com/embed/VIDEO_ID
 // For Vimeo: Use embed URL format: https://player.vimeo.com/video/VIDEO_ID
-const VIDEO_URL = ''; // Add your video embed URL here
+const VIDEO_URL = 'https://www.youtube.com/embed/WV9kaWGz-AU?si=b8PfgGB1z4WVLwn0'; // Add your video embed URL here
 
 const VideoPage = () => {
   return (
